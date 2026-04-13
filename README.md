@@ -13,6 +13,17 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
+## Dev publisher (feeds execution queue)
+
+With Redis on localhost:
+
+```bash
+pip install -r requirements.txt
+REDIS_HOST=localhost python scripts/dev_publish_intent.py
+```
+
+Docker: see `agent-mesh-infra` `pipeline` service.
+
 ## Run (stubs)
 
 ```bash
