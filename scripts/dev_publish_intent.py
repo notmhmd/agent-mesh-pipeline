@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LPUSH sample ApprovedIntent JSON for agent-mesh-execution BRPOP (dev only)."""
+"""XADD sample ApprovedIntent JSON to Redis Streams (consumer: agent-mesh-execution)."""
 
 import json
 import os
@@ -9,14 +9,18 @@ import uuid
 import redis
 
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-INTENTS_KEY = "approved:intents"
+# Must match IntentConsumerWorker.StreamKey in execution service
+STREAM_KEY = os.getenv("STREAM_KEY", "stream:approved:intents")
 INTERVAL = float(os.getenv("PUBLISH_INTERVAL_SEC", "45"))
 
 
 def main() -> None:
     r = redis.Redis(host=REDIS_HOST, port=6379, decode_responses=True)
     r.ping()
-    print(f"Publishing sample intents to {INTENTS_KEY} every {INTERVAL}s → redis://{REDIS_HOST}:6379")
+    print(
+        f"XADD {STREAM_KEY} every {INTERVAL}s → redis://{REDIS_HOST}:6379 "
+        "(field `data` = JSON)"
+    )
 
     n = 0
     while True:
@@ -33,8 +37,8 @@ def main() -> None:
             "created_at_unix": time.time(),
         }
         raw = json.dumps(payload, separators=(",", ":"))
-        r.lpush(INTENTS_KEY, raw)
-        print(f"[{n}] LPUSH {INTENTS_KEY} ({len(raw)} bytes)")
+        entry_id = r.xadd(STREAM_KEY, {"data": raw})
+        print(f"[{n}] XADD {STREAM_KEY} id={entry_id} ({len(raw)} bytes)")
         time.sleep(INTERVAL)
 
 
