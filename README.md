@@ -22,5 +22,5 @@ python -c "from agent_mesh_pipeline.feed import run_feed_loop; run_feed_loop()"
 ## Related
 
 - `agent-mesh-contracts` — schemas
-- `agent-mesh-execution` — Go consumer
+- `agent-mesh-execution` — .NET gateway
 - `agent-mesh-infra` — compose
